@@ -1,0 +1,15 @@
+version: "3.7"
+services:
+  node_dev:
+    image: node_dev
+    container_name: ${CONTAINER_NAME:?missing}
+    environment:
+      PORT: 3000
+    labels:
+      type: docker.dev.box
+    ports:
+      - 8080:3000
+    volumes:
+       - ${APP_HOME:?missing}/:/home/app
+
+#https://auth0.com/blog/use-docker-to-create-a-node-development-environment/
