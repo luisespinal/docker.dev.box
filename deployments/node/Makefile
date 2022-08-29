@@ -1,4 +1,3 @@
-# build file for FireFly TOR management service
 TSTAMP := $(shell date -u '+%Y.%M.%d.%H.%m.%s.%Z')
 VERSION := $(shell git describe --tags 2> /dev/null || echo SNAPSHOT)
 BUILD := $(shell git rev-parse --short HEAD 2> /dev/null || echo none)
@@ -7,11 +6,16 @@ PROJECTNAME := $(shell basename "$(PWD)")
 APPUID = $(shell id -u)
 APPGID = $(shell id -g)
 
-ENV_VARS = APP_HOME=$(NODE_APP_HOME) CONTAINER_NAME=$(NODE_DEV_CONTAINER_NAME)
+APP_HOME ?= $(shell pwd)
+CONTAINER_NAME ?= $(PROJECTNAME)_cnt
+TAG      ?= node_dev
+
+ENV_VARS = APP_HOME=$(APP_HOME) CONTAINER_NAME=$(CONTAINER_NAME) TAG=$(TAG)
 COMPOSE  = $(ENV_VARS) $(shell which docker-compose)
 DOCKER   = $(ENV_VARS) $(shell which docker)
 
-TAG      = node_dev
+
+
 .PHONY: build
 build:
 	$(DOCKER) build \
@@ -52,4 +56,11 @@ help: Makefile
 	@echo
 	@sed -n 's/^##//p' $< | column -t -s ':' | sed -e 's/^/ /'
 	@echo
-		  
+	@echo VARS:
+	@echo APP_HOME:$(APP_HOME)
+	@echo PROJECTNAME:$(PROJECTNAME)
+	@echo CONTAINER_NAME:$(CONTAINER_NAME)
+	@echo ENV_VARS:$(ENV_VARS)
+	@echo DOCKER:$(DOCKER)
+	@echo COMPOSE:$(COMPOSE)
+	@echo TAG:$(TAG)

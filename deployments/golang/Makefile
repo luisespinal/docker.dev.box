@@ -1,4 +1,3 @@
-# build file for FireFly TOR management service
 TSTAMP := $(shell date -u '+%Y.%M.%d.%H.%m.%s.%Z')
 VERSION := $(shell git describe --tags 2> /dev/null || echo SNAPSHOT)
 BUILD := $(shell git rev-parse --short HEAD 2> /dev/null || echo none)
@@ -7,11 +6,15 @@ PROJECTNAME := $(shell basename "$(PWD)")
 APPUID = $(shell id -u)
 APPGID = $(shell id -g)
 
-ENV_VARS = APP_HOME=$(NODE_APP_HOME) CONTAINER_NAME=$(NODE_DEV_CONTAINER_NAME)
+APP_HOME ?= $(shell pwd)
+CONTAINER_NAME ?= $(PROJECTNAME)_cnt
+TAG      ?= golang_dev
+
+ENV_VARS = APP_HOME=$(APP_HOME) CONTAINER_NAME=$(CONTAINER_NAME) TAG=$(TAG)
 COMPOSE  = $(ENV_VARS) $(shell which docker-compose)
 DOCKER   = $(ENV_VARS) $(shell which docker)
 
-TAG      = golang_dev
+
 
 .PHONY: build
 build:
@@ -19,6 +22,7 @@ build:
 		--build-arg group_id=$(APPUID) \
 		--build-arg user_id=$(APPUID) \
 		--build-arg type=golang \
+		--build-arg app_name=$(TAG) \
 		--tag $(TAG) .
 
 ## local-docker-up: docker-compose up, make sure that you export your github access_code as env variable
@@ -37,12 +41,12 @@ up:
 
 .PHONE: shell
 shell:
-	$(COMPOSE) exec $(TAG) /bin/bash
+	$(COMPOSE) exec $(TAG) /bin/sh
 
 .PHONY: clean
 clean:
-	docker container prune --force --filter label=docker.dev.box.name=node_dev
-	docker image prune -a --force --filter label=docker.dev.box.name=node_dev
+	docker container prune --force --filter label=docker.dev.box.name=$(TAG)
+	docker image prune -a --force --filter label=docker.dev.box.name=$(TAG)
 
 ## help: Print usage information
 .PHONY: help
@@ -51,5 +55,12 @@ help: Makefile
 	@echo "Choose a command to run in $(PROJECTNAME):"
 	@echo
 	@sed -n 's/^##//p' $< | column -t -s ':' | sed -e 's/^/ /'
-	@echo
-		  
+	@echo	
+	@echo VARS:
+	@echo APP_HOME:$(APP_HOME)
+	@echo PROJECTNAME:$(PROJECTNAME)
+	@echo CONTAINER_NAME:$(CONTAINER_NAME)
+	@echo ENV_VARS:$(ENV_VARS)
+	@echo DOCKER:$(DOCKER)
+	@echo COMPOSE:$(COMPOSE)
+	@echo TAG:$(TAG)

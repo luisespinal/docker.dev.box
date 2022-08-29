@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   node_dev:
-    image: node_dev
+    image: ${TAG:?missing}
     container_name: ${CONTAINER_NAME:?missing}
     environment:
       PORT: 3000
