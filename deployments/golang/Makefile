@@ -11,20 +11,20 @@ ENV_VARS = APP_HOME=$(NODE_APP_HOME) CONTAINER_NAME=$(NODE_DEV_CONTAINER_NAME)
 COMPOSE  = $(ENV_VARS) $(shell which docker-compose)
 DOCKER   = $(ENV_VARS) $(shell which docker)
 
-TAG      = node_dev
+TAG      = golang_dev
+
 .PHONY: build
 build:
 	$(DOCKER) build \
 		--build-arg group_id=$(APPUID) \
 		--build-arg user_id=$(APPUID) \
-		--build-arg type=node \
-		--build-arg app_name=$(TAG) \
+		--build-arg type=golang \
 		--tag $(TAG) .
 
 ## local-docker-up: docker-compose up, make sure that you export your github access_code as env variable
 .PHONY: run
 run:
-	$(COMPOSE) run $(TAG) /bin/bash
+	$(COMPOSE) run $(TAG) /bin/sh
 
 ## local-docker-down: docker-compose down
 .PHONY: down
@@ -41,8 +41,8 @@ shell:
 
 .PHONY: clean
 clean:
-	docker container prune --force --filter label=docker.dev.box.name=$(TAG)
-	docker image prune -a --force --filter label=docker.dev.box.name=$(TAG)
+	docker container prune --force --filter label=docker.dev.box.name=node_dev
+	docker image prune -a --force --filter label=docker.dev.box.name=node_dev
 
 ## help: Print usage information
 .PHONY: help

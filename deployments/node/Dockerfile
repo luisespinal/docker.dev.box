@@ -5,7 +5,7 @@ ARG user_id=1000
 ARG app_name=na
 
 LABEL docker.dev.box.name=${app_name}
-
+LABEL docker.dev.box.type=node
 ENV TZ=America/New_York
 
 ENV LANG en_US.UTF-8
