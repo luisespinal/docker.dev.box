@@ -1,18 +1,21 @@
-TSTAMP := $(shell date -u '+%Y.%M.%d.%H.%m.%s.%Z')
-VERSION := $(shell git describe --tags 2> /dev/null || echo SNAPSHOT)
-BUILD := $(shell git rev-parse --short HEAD 2> /dev/null || echo none)
-PROJECTNAME := $(shell basename "$(PWD)")
+TSTAMP         := $(shell date -u '+%Y.%M.%d.%H.%m.%s.%Z')
+VERSION        := $(shell git describe --tags 2> /dev/null || echo SNAPSHOT)
+BUILD          := $(shell git rev-parse --short HEAD 2> /dev/null || echo none)
+PROJECTNAME    := $(shell basename "$(PWD)")
 
-APPUID = $(shell id -u)
-APPGID = $(shell id -g)
+APPUID         := $(shell id -u)
+APPGID         := $(shell id -g)
 
-APP_HOME ?= $(shell pwd)
+STACK          := golang
+DEFAULT_SHELL  := /bin/bash
+
+APP_HOME       ?= $(shell pwd)
 CONTAINER_NAME ?= $(PROJECTNAME)_cnt
-TAG      ?= golang_dev
+TAG            ?= $(STACK)_dev
 
-ENV_VARS = APP_HOME=$(APP_HOME) CONTAINER_NAME=$(CONTAINER_NAME) TAG=$(TAG)
-COMPOSE  = $(ENV_VARS) $(shell which docker-compose)
-DOCKER   = $(ENV_VARS) $(shell which docker)
+ENV_VARS       := APP_HOME=$(APP_HOME) CONTAINER_NAME=$(CONTAINER_NAME) TAG=$(TAG)
+COMPOSE        := $(ENV_VARS) $(shell which docker-compose)
+DOCKER         := $(ENV_VARS) $(shell which docker)
 
 
 
@@ -21,14 +24,14 @@ build:
 	$(DOCKER) build \
 		--build-arg group_id=$(APPUID) \
 		--build-arg user_id=$(APPUID) \
-		--build-arg type=golang \
+		--build-arg type=$(STACK) \
 		--build-arg app_name=$(TAG) \
 		--tag $(TAG) .
 
 ## local-docker-up: docker-compose up, make sure that you export your github access_code as env variable
 .PHONY: run
 run:
-	$(COMPOSE) run $(TAG) /bin/sh
+	$(COMPOSE) run $(TAG) /bin/bash
 
 ## local-docker-down: docker-compose down
 .PHONY: down
@@ -41,7 +44,7 @@ up:
 
 .PHONE: shell
 shell:
-	$(COMPOSE) exec $(TAG) /bin/sh
+	$(COMPOSE) exec $(TAG) $(DEFAULT_SHELL)
 
 .PHONY: clean
 clean:
